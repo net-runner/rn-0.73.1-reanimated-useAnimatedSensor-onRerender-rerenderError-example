@@ -5,113 +5,86 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
+  View,
+  Text,
   StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+  Button,
+  ScrollView,
 } from 'react-native';
+import React, {useState} from 'react';
+import Animated, {
+  useAnimatedSensor,
+  SensorType,
+  useAnimatedStyle,
+  withSpring,
+  useDerivedValue,
+} from 'react-native-reanimated';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+function App(): React.JSX.Element {
+  const [testState, setTestState] = useState('test50');
+  const rotation = useAnimatedSensor(SensorType.ROTATION, {
+    interval: 20,
+  });
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const roll = useDerivedValue(() => {
+    return rotation.sensor.value.roll;
+  });
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const pitch = useDerivedValue(() => {
+    return rotation.sensor.value.pitch;
+  });
+
+  const backgroundStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: withSpring(-roll.value * 25, {
+            damping: 200,
+          }),
+        },
+        {
+          translateY: withSpring(-pitch.value * 25, {
+            damping: 200,
+          }),
+        },
+      ],
+    };
+  });
   return (
-    <View style={styles.sectionContainer}>
-      <Text
+    <View style={styles.container}>
+      <Animated.View
         style={[
-          styles.sectionTitle,
+          backgroundStyle,
           {
-            color: isDarkMode ? Colors.white : Colors.black,
+            width: 500,
+            height: 500,
+            backgroundColor: 'blue',
+            position: 'absolute',
           },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+        ]}
+      />
+      <Animated.View
+        style={{
+          width: 200,
+          height: 200,
+          backgroundColor: 'red',
+          position: 'absolute',
+        }}
+      />
+      <Text>Press the boom button to crash the app! {testState}</Text>
+      <Button onPress={() => setTestState('BOOM')} title={'Run boom'} />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
