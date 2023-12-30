@@ -5,21 +5,13 @@
  * @format
  */
 
-import {
-  View,
-  Text,
-  StatusBar,
-  StyleSheet,
-  Button,
-  ScrollView,
-} from 'react-native';
+import {View, Text, StyleSheet, Button} from 'react-native';
 import React, {useState} from 'react';
 import Animated, {
   useAnimatedSensor,
   SensorType,
   useAnimatedStyle,
   withSpring,
-  useDerivedValue,
 } from 'react-native-reanimated';
 
 function App(): React.JSX.Element {
@@ -28,24 +20,17 @@ function App(): React.JSX.Element {
     interval: 20,
   });
 
-  const roll = useDerivedValue(() => {
-    return rotation.sensor.value.roll;
-  });
-
-  const pitch = useDerivedValue(() => {
-    return rotation.sensor.value.pitch;
-  });
-
   const backgroundStyle = useAnimatedStyle(() => {
+    const {roll, pitch} = rotation.sensor.value;
     return {
       transform: [
         {
-          translateX: withSpring(-roll.value * 25, {
+          translateX: withSpring(-roll * 25, {
             damping: 200,
           }),
         },
         {
-          translateY: withSpring(-pitch.value * 25, {
+          translateY: withSpring(-pitch * 25, {
             damping: 200,
           }),
         },
